@@ -127,6 +127,8 @@ namespace Util.UI
             for (int i = 0; i < weights.Length; i++)
             {
                 var weight = weights[i];
+                if (weight.Index >= sizes.Length) continue;
+
                 if (Mathf.Approximately(sizes[weight.Index], -1f))
                 {
                     sizes[weight.Index] = weight.Weight * totalSize;
