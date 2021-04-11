@@ -58,3 +58,9 @@ sysinfo.txt
 # Crashlytics generated file
 crashlytics-build.properties
 
+
+
+# Ignore Assets Subfolders Except the _Project folder (everything else will be 3rd party)
+/[Aa]ssets/**
+!/[Aa]ssets/_Project/
+!/[Aa]ssets/_Project/**
