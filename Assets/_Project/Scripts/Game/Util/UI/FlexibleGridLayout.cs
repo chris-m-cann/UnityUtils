@@ -1,4 +1,5 @@
 using System;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -36,6 +37,12 @@ namespace Util.UI
 
         private float[] _columnProportions;
         private float[] _rowProportions;
+
+        protected override void OnEnable()
+        {
+            base.OnEnable();
+            CalculateLayoutInputHorizontal();
+        }
 
         public override void CalculateLayoutInputHorizontal()
         {
