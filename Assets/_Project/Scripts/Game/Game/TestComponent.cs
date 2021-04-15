@@ -7,4 +7,6 @@ public class TestComponent : MonoBehaviour
 {
     [RangeSlider(-9, 15)]
     public Range range;
+
+    public Pair<int, float> pair;
 }

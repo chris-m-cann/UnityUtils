@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Util
@@ -26,5 +27,9 @@ namespace Util
         public static float HalfClosedRange(Range range, float minDiff = float.Epsilon) => Random.Range(range.Start + minDiff, range.End);
 
         #endregion
+
+
+        public static T RandomElement<T>(this T[] self) => self[Random.Range(0, self.Length)];
+        public static T RandomElement<T>(this List<T> self) => self[Random.Range(0, self.Count)];
     }
 }

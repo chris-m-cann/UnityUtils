@@ -71,7 +71,7 @@ namespace Util
             GUI.Label(startLabelRect, "start");
 
             var startFieldRect = startLabelRect;
-            startFieldRect.x += 20f;
+            startFieldRect.x += 30f;
             startFieldRect.width = fieldWidth;
             EditorGUI.PropertyField(startFieldRect, minProperty, GUIContent.none, true);
 
@@ -82,7 +82,7 @@ namespace Util
             EditorGUI.PropertyField(endFieldRect, maxProperty, GUIContent.none, true);
 
             var endLabelRect = endFieldRect;
-            endLabelRect.x = endFieldRect.x - 15f;
+            endLabelRect.x = endFieldRect.x - 25f;
             endLabelRect.width = 25f;
             GUI.Label(endLabelRect, "end");
         }
