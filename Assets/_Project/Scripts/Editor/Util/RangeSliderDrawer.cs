@@ -59,32 +59,12 @@ namespace Util
         private void LayoutStartAndEnd(Rect overallRect, SerializedProperty minProperty,
             SerializedProperty maxProperty)
         {
-            var width = overallRect.width;
-            width -= 30 + 25; // for the labels;
-            width /= 2; // start and end
+            var values = new float[] {minProperty.floatValue, maxProperty.floatValue};
 
-            var fieldWidth = Mathf.Clamp(width, 58, 120);
+            EditorGUI.MultiFloatField(overallRect, new[] {new GUIContent("start"), new GUIContent("end")}, values);
 
-
-            var startLabelRect = overallRect;
-            startLabelRect.width = 30f;
-            GUI.Label(startLabelRect, "start");
-
-            var startFieldRect = startLabelRect;
-            startFieldRect.x += 30f;
-            startFieldRect.width = fieldWidth;
-            EditorGUI.PropertyField(startFieldRect, minProperty, GUIContent.none, true);
-
-
-            var endFieldRect = overallRect;
-            endFieldRect.x = overallRect.xMax - fieldWidth;
-            endFieldRect.width = fieldWidth;
-            EditorGUI.PropertyField(endFieldRect, maxProperty, GUIContent.none, true);
-
-            var endLabelRect = endFieldRect;
-            endLabelRect.x = endFieldRect.x - 25f;
-            endLabelRect.width = 25f;
-            GUI.Label(endLabelRect, "end");
+            minProperty.floatValue = values[0];
+            maxProperty.floatValue = values[1];
         }
 
 
