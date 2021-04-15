@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -9,4 +10,9 @@ public class TestComponent : MonoBehaviour
     public Range range;
 
     public Pair<int, float> pair;
+
+    private void Start()
+    {
+        this.ExecuteAfter(1, () => { Debug.Log("Delayed Execution"); });
+    }
 }
