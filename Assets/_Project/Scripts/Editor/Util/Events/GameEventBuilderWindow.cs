@@ -13,21 +13,29 @@ namespace Util.Events
     public class GameEventBuilderWindow : EditorWindow
     {
         private const string EVENT_TYPENAME_KEY = "Util.Events.GameEventBuilderWindow.EventTypeName";
+        private const string EVENT_NAMESPACE_KEY = "Util.Events.GameEventBuilderWindow.EventNamespace";
         private const string EVENT_FILEPATH_KEY = "Util.Events.GameEventBuilderWindow.EventClassFilepath";
         private const string EDITOR_FILEPATH_KEY = "Util.Events.GameEventBuilderWindow.EditorClassFilepath";
 
+        private const string GAME_EVENT_CLASS_SUFFIX = "GameEvent";
+        private const string EVENT_EDITOR_CLASS_SUFFIX = "GameEventEditor";
+        private const string EVENT_LISTENER_CLASS_SUFFIX = "GameEventListenerBehaviour";
+
         public string EventTypeName;
+        public string EventNamespace = "Util.Events";
         public string EventClassFilepath;
         public string EditorClassFilepath;
 
         private SerializedObject _so;
 
         private SerializedProperty _propEventTypeName;
+        private SerializedProperty _propEventNamespace;
         private SerializedProperty _propEventClassFilepath;
         private SerializedProperty _propEditorClassFilepath;
 
 
         [MenuItem("Tools/GameEventBuilder")]
+        [MenuItem("Assets/Create/Custom/Events/new event...")]
         private static void ShowWindow()
         {
             var window = GetWindow<GameEventBuilderWindow>();
@@ -35,14 +43,25 @@ namespace Util.Events
             window.Show();
         }
 
+        private string GetEventPath(string prefix) => EventClassFilepath + Path.DirectorySeparatorChar + prefix +
+                                                      GAME_EVENT_CLASS_SUFFIX + ".cs";
+
+        private string GetEditorPath(string prefix) => EditorClassFilepath + Path.DirectorySeparatorChar + prefix +
+                                                       EVENT_EDITOR_CLASS_SUFFIX + ".cs";
+
+        private string GetListenerPath(string prefix) => EventClassFilepath + Path.DirectorySeparatorChar + prefix +
+                                                         EVENT_LISTENER_CLASS_SUFFIX + "GameEventListenerBehaviour.cs";
+
         private void OnEnable()
         {
             _so = new SerializedObject(this);
             _propEventTypeName = _so.FindProperty("EventTypeName");
+            _propEventNamespace = _so.FindProperty("EventNamespace");
             _propEventClassFilepath = _so.FindProperty("EventClassFilepath");
             _propEditorClassFilepath = _so.FindProperty("EditorClassFilepath");
 
             EventTypeName = EditorPrefs.GetString(EVENT_TYPENAME_KEY, EventTypeName);
+            EventNamespace = EditorPrefs.GetString(EVENT_NAMESPACE_KEY, EventNamespace);
             EventClassFilepath = EditorPrefs.GetString(EVENT_FILEPATH_KEY, EventClassFilepath);
             EditorClassFilepath = EditorPrefs.GetString(EDITOR_FILEPATH_KEY, EditorClassFilepath);
         }
@@ -50,6 +69,7 @@ namespace Util.Events
         private void OnDisable()
         {
             EditorPrefs.SetString(EVENT_TYPENAME_KEY, EventTypeName);
+            EditorPrefs.SetString(EVENT_NAMESPACE_KEY, EventNamespace);
             EditorPrefs.SetString(EVENT_FILEPATH_KEY, EventClassFilepath);
             EditorPrefs.SetString(EDITOR_FILEPATH_KEY, EditorClassFilepath);
         }
@@ -59,6 +79,7 @@ namespace Util.Events
             using (_so.UpdateScope())
             {
                 EditorGUILayout.PropertyField(_propEventTypeName);
+                EditorGUILayout.PropertyField(_propEventNamespace);
 
                 using (new GUILayout.HorizontalScope())
                 {
@@ -74,11 +95,22 @@ namespace Util.Events
 
                 if (GUILayout.Button("Generate"))
                 {
-                    GenerateClasses();
+                    var prefix = ParsePrefix();
+                    if (!string.IsNullOrEmpty(prefix))
+                    {
+                        GenerateClasses(prefix);
+                    }
+                }
+
+                if (GUILayout.Button("Delete"))
+                {
+                    var prefix = ParsePrefix();
+                    if (!string.IsNullOrEmpty(prefix))
+                    {
+                        DeleteClassFiles(prefix);
+                    }
                 }
             }
-
-
 
 
             // if left mouse clicked then remove focus from our properties
@@ -101,8 +133,7 @@ namespace Util.Events
 
             if (GUILayout.Button("Browse", GUILayout.Width(80)))
             {
-                result =
-                    EditorUtility.OpenFolderPanel("", openAt, "");
+                result = EditorUtility.OpenFolderPanel("", openAt, "");
 
                 GUI.FocusControl(null);
                 Repaint();
@@ -111,151 +142,24 @@ namespace Util.Events
             if (String.IsNullOrEmpty(result)) return;
 
             prop.stringValue = result;
-
-
         }
 
-
-        private void GenerateClasses()
+        private string ParsePrefix()
         {
             var prefix = TakeLastWhile(EventTypeName, c => char.IsLetterOrDigit(c) || c == '_');
 
-            if (String.IsNullOrEmpty(prefix) || !System.CodeDom.Compiler.CodeGenerator.IsValidLanguageIndependentIdentifier(prefix))
+            if (String.IsNullOrEmpty(prefix) || !CodeGenerator.IsValidLanguageIndependentIdentifier(prefix))
             {
                 Debug.LogError($"Cannot generate classes with prefx = {prefix}");
-                return;
+                return "";
             }
 
             prefix = char.ToUpper(prefix.First()) + prefix.Substring(1);
 
-            Debug.Log($"Generate classes with prefix = {prefix}");
 
-            GenerateEventClass(prefix);
-            GenerateListenerClass(prefix);
-            GenerateEditorClass(prefix);
+            Debug.Log($"GameEventBuilder: Parsed Prefix = {prefix}");
 
-            AssetDatabase.Refresh();
-        }
-
-        private void GenerateEventClass(string prefix)
-        {
-            if (string.IsNullOrEmpty(EventClassFilepath) || !Directory.Exists(EventClassFilepath))
-            {
-                Debug.LogError($"Directory '{EventClassFilepath}' does not exist");
-                return;
-            }
-
-            var path = EventClassFilepath + Path.DirectorySeparatorChar + prefix + "GameEvent" + ".cs";
-
-            var eventClass = new CodeTypeDeclaration(prefix + "GameEvent")
-            {
-                TypeAttributes = TypeAttributes.Public | TypeAttributes.Sealed
-            };
-
-
-            var createAssetMenu = new CodeAttributeDeclaration("CreateAssetMenu");
-            createAssetMenu.Arguments.Add(
-                new CodeAttributeArgument(new CodeSnippetExpression($"menuName = \"Custom/Events/{EventTypeName}\"")));
-
-            var baseClass = new CodeTypeReference($"GameEvent<{EventTypeName}>");
-
-            eventClass.BaseTypes.Add(baseClass);
-            eventClass.CustomAttributes.Add(createAssetMenu);
-
-            var @namespace = new CodeNamespace
-            {
-                Name = "Util.Events",
-                Types = {eventClass},
-                Imports = {new CodeNamespaceImport("UnityEngine")}
-            };
-
-
-            var compileUnit = new CodeCompileUnit
-            {
-                Namespaces = {@namespace}
-            };
-
-
-            WriteCsFile(path, compileUnit);
-        }
-
-        private void GenerateEditorClass(string prefix)
-        {
-            if (string.IsNullOrEmpty(EditorClassFilepath) || !Directory.Exists(EditorClassFilepath))
-            {
-                Debug.LogError($"Directory '{EditorClassFilepath}' does not exist");
-                return;
-            }
-
-            var path = EditorClassFilepath + Path.DirectorySeparatorChar + prefix + "GameEventEditor" + ".cs";
-
-            var editorClass = new CodeTypeDeclaration(prefix + "GameEventEditor")
-            {
-                TypeAttributes = TypeAttributes.Public | TypeAttributes.Sealed
-            };
-
-
-            var customEditor = new CodeAttributeDeclaration("CustomEditor");
-            var canEditMultipleObjects = new CodeAttributeDeclaration("CanEditMultipleObjects");
-            customEditor.Arguments.Add(
-                new CodeAttributeArgument(new CodeSnippetExpression($"typeof({prefix + "GameEvent"})")));
-
-            var baseClass = new CodeTypeReference($"GameEventEditor<{EventTypeName}>");
-
-            editorClass.BaseTypes.Add(baseClass);
-            editorClass.CustomAttributes.Add(customEditor);
-            editorClass.CustomAttributes.Add(canEditMultipleObjects);
-
-            var @namespace = new CodeNamespace
-            {
-                Name = "Util.Events",
-                Types = {editorClass},
-                Imports = {new CodeNamespaceImport("UnityEditor")}
-            };
-
-
-            var compileUnit = new CodeCompileUnit
-            {
-                Namespaces = {@namespace}
-            };
-
-
-            WriteCsFile(path, compileUnit);
-        }
-
-        private void GenerateListenerClass(string prefix)
-        {
-            if (string.IsNullOrEmpty(EventClassFilepath) || !Directory.Exists(EventClassFilepath))
-            {
-                Debug.LogError($"Directory '{EventClassFilepath}' does not exist");
-                return;
-            }
-
-            var path = EventClassFilepath + Path.DirectorySeparatorChar + prefix + "GameEventListenerBehaviour" + ".cs";
-
-            var editorClass = new CodeTypeDeclaration(prefix + "GameEventListenerBehaviour")
-            {
-                TypeAttributes = TypeAttributes.Public | TypeAttributes.Sealed
-            };
-
-            var baseClass = new CodeTypeReference($"GameEventListenerBehaviour<{EventTypeName}, {prefix + "GameEvent"}>");
-
-            editorClass.BaseTypes.Add(baseClass);
-
-            var @namespace = new CodeNamespace
-            {
-                Name = "Util.Events",
-                Types = {editorClass}
-            };
-
-
-            var compileUnit = new CodeCompileUnit
-            {
-                Namespaces = {@namespace}
-            };
-
-
-            WriteCsFile(path, compileUnit);
+            return prefix;
         }
 
         private string TakeLastWhile(string str, Func<char, bool> predicate)
@@ -275,15 +179,140 @@ namespace Util.Events
             return str.Substring(idx);
         }
 
+        private void GenerateClasses(string prefix)
+        {
+            GenerateEventClass(prefix);
+            GenerateListenerClass(prefix);
+            GenerateEditorClass(prefix);
+
+            AssetDatabase.Refresh();
+        }
+
+        private void GenerateEventClass(string prefix)
+        {
+            if (string.IsNullOrEmpty(EventClassFilepath) || !Directory.Exists(EventClassFilepath))
+            {
+                Debug.LogError($"Directory '{EventClassFilepath}' does not exist");
+                return;
+            }
+
+            var path = GetEventPath(prefix);
+
+            var eventClass = new CodeTypeDeclaration(prefix + GAME_EVENT_CLASS_SUFFIX)
+            {
+                TypeAttributes = TypeAttributes.Public | TypeAttributes.Sealed
+            };
 
 
+            var createAssetMenu = new CodeAttributeDeclaration("CreateAssetMenu");
+            createAssetMenu.Arguments.Add(
+                new CodeAttributeArgument(new CodeSnippetExpression($"menuName = \"Custom/Events/{EventTypeName}\"")));
+
+            var baseClass = new CodeTypeReference($"GameEvent<{EventTypeName}>");
+
+            eventClass.BaseTypes.Add(baseClass);
+            eventClass.CustomAttributes.Add(createAssetMenu);
+
+            var @namespace = new CodeNamespace
+            {
+                Name = _propEventNamespace.stringValue,
+                Types = {eventClass},
+                Imports = {new CodeNamespaceImport("UnityEngine")}
+            };
+
+            var compileUnit = new CodeCompileUnit
+            {
+                Namespaces = {@namespace}
+            };
+
+
+            WriteCsFile(path, compileUnit);
+        }
+
+        private void GenerateEditorClass(string prefix)
+        {
+            if (string.IsNullOrEmpty(EditorClassFilepath) || !Directory.Exists(EditorClassFilepath))
+            {
+                Debug.LogError($"Directory '{EditorClassFilepath}' does not exist");
+                return;
+            }
+
+            var path = GetEditorPath(prefix);
+
+            var editorClass = new CodeTypeDeclaration(prefix + EVENT_EDITOR_CLASS_SUFFIX)
+            {
+                TypeAttributes = TypeAttributes.Public | TypeAttributes.Sealed
+            };
+
+
+            var customEditor = new CodeAttributeDeclaration("CustomEditor");
+            var canEditMultipleObjects = new CodeAttributeDeclaration("CanEditMultipleObjects");
+            customEditor.Arguments.Add(
+                new CodeAttributeArgument(new CodeSnippetExpression($"typeof({prefix + GAME_EVENT_CLASS_SUFFIX})")));
+
+            var baseClass = new CodeTypeReference($"GameEventEditor<{EventTypeName}>");
+
+            editorClass.BaseTypes.Add(baseClass);
+            editorClass.CustomAttributes.Add(customEditor);
+            editorClass.CustomAttributes.Add(canEditMultipleObjects);
+
+            var @namespace = new CodeNamespace
+            {
+                Name = _propEventNamespace.stringValue,
+                Types = {editorClass},
+                Imports = {new CodeNamespaceImport("UnityEditor"), new CodeNamespaceImport("UnityEngine")}
+            };
+
+            var compileUnit = new CodeCompileUnit
+            {
+                Namespaces = {@namespace}
+            };
+
+
+            WriteCsFile(path, compileUnit);
+        }
+
+        private void GenerateListenerClass(string prefix)
+        {
+            if (string.IsNullOrEmpty(EventClassFilepath) || !Directory.Exists(EventClassFilepath))
+            {
+                Debug.LogError($"Directory '{EventClassFilepath}' does not exist");
+                return;
+            }
+
+            var path = GetListenerPath(prefix);
+
+            var editorClass = new CodeTypeDeclaration(prefix + EVENT_LISTENER_CLASS_SUFFIX)
+            {
+                TypeAttributes = TypeAttributes.Public | TypeAttributes.Sealed
+            };
+
+            var baseClass =
+                new CodeTypeReference($"GameEventListenerBehaviour<{EventTypeName}, {prefix + GAME_EVENT_CLASS_SUFFIX}>");
+
+            editorClass.BaseTypes.Add(baseClass);
+
+            var @namespace = new CodeNamespace
+            {
+                Name = _propEventNamespace.stringValue,
+                Types = {editorClass},
+                Imports = {new CodeNamespaceImport("UnityEngine")}
+            };
+
+            var compileUnit = new CodeCompileUnit
+            {
+                Namespaces = {@namespace}
+            };
+
+            WriteCsFile(path, compileUnit);
+        }
 
         private static void WriteCsFile(string path, CodeCompileUnit compileUnit)
         {
             var directory = Path.GetDirectoryName(path);
             if (directory != null)
             {
-                System.IO.Directory.CreateDirectory(directory);
+                Directory.CreateDirectory(directory);
             }
 
             using var provider = new CSharpCodeProvider();
@@ -297,6 +326,22 @@ namespace Util.Events
                 IndentString = "    "
             };
             provider.GenerateCodeFromCompileUnit(compileUnit, sw, opt);
+        }
+
+        private void DeleteClassFiles(string prefix)
+        {
+            var eventPath = GetEventPath(prefix);
+            var editorPath = GetEditorPath(prefix);
+            var listenerPath = GetListenerPath(prefix);
+
+            File.Delete(eventPath);
+            File.Delete(eventPath + ".meta");
+            File.Delete(editorPath);
+            File.Delete(editorPath + ".meta");
+            File.Delete(listenerPath);
+            File.Delete(listenerPath + ".meta");
+
+            AssetDatabase.Refresh();
         }
     }
 }
