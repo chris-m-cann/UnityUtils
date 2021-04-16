@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Util
 {
-    public static class LayerMaskUtils
+    public static class LayerMaskEx
     {
         public static bool Contains(this LayerMask self, int layer)
         {

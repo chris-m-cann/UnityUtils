@@ -4,7 +4,7 @@ using UnityEngine.Events;
 
 namespace Util
 {
-    public static class CoroutinesUtils
+    public static class CoroutinesEx
     {
 
         public static void ExecuteAfter(this MonoBehaviour self, float delay, UnityAction action) {
