@@ -67,7 +67,6 @@ namespace Util
             maxProperty.floatValue = values[1];
         }
 
-
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
             return EditorGUIUtility.singleLineHeight * 2;
