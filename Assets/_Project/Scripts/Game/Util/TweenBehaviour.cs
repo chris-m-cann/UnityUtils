@@ -349,9 +349,9 @@ namespace Util
 
             // theres a weird bug where the property isnt being updated smoothly when timescale independant
             // it seems to jump frames ahead to nealy being done. cant see why though
-            return DOTween
-                .To(getter, it => SetShaderProperty(material, tween.PropertyName, it), tweenEnd, tween.Duration)
-                .From(tweenStart);
+            return DOTween.To(getter, it => SetShaderProperty(material, tween.PropertyName, it), tweenEnd, tween.Duration);
+            // return DOTween
+            //     .To(getter, it => SetShaderProperty(material, tween.PropertyName, it), tweenEnd, tween.Duration);
         }
 
         private void SetShaderProperty(Material material, string propertyName, float value)
