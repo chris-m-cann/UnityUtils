@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Util
 {
-    [CustomPropertyDrawer(typeof(TweenBehaviour.TweenDescription))]
+    [CustomPropertyDrawer(typeof(TweenDescription))]
     public class TweenDescriptionDrawer : PropertyDrawer
     {
         private const int PADDING = 2;
@@ -18,11 +18,13 @@ namespace Util
 
             if (!property.isExpanded) return;
 
+            var propName = property.FindPropertyRelative("Name");
             var propObj = property.FindPropertyRelative("ObjectToAnimate");
             var propEase = property.FindPropertyRelative("Ease");
             var propUseCustomCurve = property.FindPropertyRelative("UseCustomCurve");
             var propCustomCurve = property.FindPropertyRelative("CustomCurve");
             var propProperty = property.FindPropertyRelative("Property");
+            var propPropertyName = property.FindPropertyRelative("PropertyName");
             var propDuration = property.FindPropertyRelative("Duration");
             var propRelativeToCurrent = property.FindPropertyRelative("RelativeToCurrent");
             var propStart = property.FindPropertyRelative("Start");
@@ -32,6 +34,7 @@ namespace Util
             var propRandomDelay = property.FindPropertyRelative("RandomDelay");
             var propDefaultDelay = property.FindPropertyRelative("DefaultDelay");
             var propOnComplete = property.FindPropertyRelative("OnComplete");
+            var propTimeScaleDependent = property.FindPropertyRelative("TimeScaleDependent");
 
 
             // set up rect for the first property
@@ -41,6 +44,7 @@ namespace Util
 
             using (new EditorGUI.IndentLevelScope(1))
             {
+                rect = PropertyOnNextLine(rect, propName);
                 rect = PropertyOnNextLine(rect, propObj);
                 rect = PropertyOnNextLine(rect, propEase);
 
@@ -52,6 +56,11 @@ namespace Util
                 }
 
                 rect = PropertyOnNextLine(rect, propProperty);
+                if (propProperty.enumValueIndex == IndexOf(TweenBehaviour.Property.SpriteShaderFloat))
+                {
+                    rect = PropertyOnNextLine(rect, propPropertyName);
+                }
+                
                 rect = PropertyOnNextLine(rect, propDuration);
                 rect = PropertyOnNextLine(rect, propRelativeToCurrent);
 
@@ -81,8 +90,22 @@ namespace Util
                     rect = FloatFieldOnNextLine2(rect, propDefaultDelay);
                 }
 
+                rect = PropertyOnNextLine(rect, propTimeScaleDependent);
                 rect = PropertyOnNextLine(rect, propOnComplete);
             }
+        }
+
+        int IndexOf(TweenBehaviour.Property p)
+        {
+            int i = 0;
+            
+            foreach (TweenBehaviour.Property e in typeof(TweenBehaviour.Property).GetEnumValues())
+            {
+                if (e == p) return i;
+                i++;
+            }
+
+            return -1;
         }
 
 
@@ -160,6 +183,14 @@ namespace Util
                     rect = PropertyOnNextLine(rect, propStart);
                     rect = PropertyOnNextLine(rect, propEnd);
                     break;
+                case TweenBehaviour.Property.SpriteShaderFloat:
+                    rect = FloatFieldOnNextLine3(rect, propStart);
+                    rect = FloatFieldOnNextLine3(rect, propEnd);
+                    break;
+                case TweenBehaviour.Property.SpriteAlpha:
+                    rect = FloatFieldOnNextLine3(rect, propStart);
+                    rect = FloatFieldOnNextLine3(rect, propEnd);
+                    break;
                 default:
                     rect = PropertyOnNextLine(rect, propStart);
                     rect = PropertyOnNextLine(rect, propEnd);
@@ -196,9 +227,11 @@ namespace Util
 
                 height += TotalHeight(property, new[]
                 {
+                    "Name",
                     "ObjectToAnimate",
                     "Ease",
                     "Property",
+                    "PropertyName",
                     "Duration",
                     "RelativeToCurrent",
                     "Start",
@@ -207,6 +240,7 @@ namespace Util
                     "PlayOnEnable",
                     "RandomDelay",
                     "DefaultDelay",
+                    "TimeScaleDependent",
                     "OnComplete"
                 });
             }
