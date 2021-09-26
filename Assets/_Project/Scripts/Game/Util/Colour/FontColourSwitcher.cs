@@ -1,13 +1,13 @@
 using TMPro;
 using UnityEngine;
-using Util.Variable;
+using Util.Var.Observe;
 
 namespace Util.Colour
 {
     [RequireComponent(typeof(TMP_Text))]
     public class FontColourSwitcher : ColourSwitcher
     {
-        [SerializeField] private ColourPaletteVariable colours;
+        [SerializeField] private ObservableColourPaletteVariable observableColours;
 
         private TMP_Text _text;
 

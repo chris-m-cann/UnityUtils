@@ -1,7 +1,6 @@
 using System;
 using UnityEngine;
 using UnityEngine.UI;
-using Util.Variable;
 
 namespace Util.Colour
 {

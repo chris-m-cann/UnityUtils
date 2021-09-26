@@ -1,13 +1,13 @@
 using System;
 using UnityEngine;
-using Util.Variable;
+using Util.Var.Observe;
 
 namespace Util.Colour
 {
     [ExecuteAlways]
     public abstract class ColourSwitcher : MonoBehaviour
     {
-        [SerializeField] private ColourPaletteVariable colours;
+        [SerializeField] private ObservableColourPaletteVariable observableColours;
         [SerializeField] private int colourIndex;
 
         [Range(0, 1)]
@@ -22,14 +22,14 @@ namespace Util.Colour
 
         private void SetUpColour()
         {
-            if (colours == null) return;
-            var color = colours.Value.GetColour(colourIndex);
+            if (observableColours == null) return;
+            var color = observableColours.Value.GetColour(colourIndex);
             color.a = alphaOverride;
 
             SetColour(color);
 
-            colours.Value.OnChange -= SetUpColour;
-            colours.Value.OnChange += SetUpColour;
+            observableColours.Value.OnChange -= SetUpColour;
+            observableColours.Value.OnChange += SetUpColour;
         }
 
 

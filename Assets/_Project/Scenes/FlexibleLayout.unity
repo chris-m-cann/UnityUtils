@@ -543,6 +543,7 @@ GameObject:
   - component: {fileID: 963194228}
   - component: {fileID: 963194227}
   - component: {fileID: 963194226}
+  - component: {fileID: 963194229}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -615,6 +616,38 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &963194229
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 963194225}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a79441f348de89743a2939f4d699eac1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_RenderShadows: 1
+  m_RequiresDepthTextureOption: 2
+  m_RequiresOpaqueTextureOption: 2
+  m_CameraType: 0
+  m_Cameras: []
+  m_RendererIndex: -1
+  m_VolumeLayerMask:
+    serializedVersion: 2
+    m_Bits: 1
+  m_VolumeTrigger: {fileID: 0}
+  m_RenderPostProcessing: 0
+  m_Antialiasing: 0
+  m_AntialiasingQuality: 2
+  m_StopNaN: 0
+  m_Dithering: 0
+  m_ClearDepth: 1
+  m_AllowXRRendering: 1
+  m_RequiresDepthTexture: 0
+  m_RequiresColorTexture: 0
+  m_Version: 2
 --- !u!1 &1044685666
 GameObject:
   m_ObjectHideFlags: 0
@@ -627,7 +660,6 @@ GameObject:
   - component: {fileID: 1044685670}
   - component: {fileID: 1044685669}
   - component: {fileID: 1044685668}
-  - component: {fileID: 1044685671}
   m_Layer: 5
   m_Name: Panel
   m_TagString: Untagged
@@ -735,43 +767,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1044685666}
   m_CullTransparentMesh: 1
---- !u!114 &1044685671
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1044685666}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 80bff3e49246b4c4a9acbeada9480be4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  tweens:
-  - Name: 
-    ObjectToAnimate: {fileID: 0}
-    Ease: 1
-    UseCustomCurve: 0
-    CustomCurve:
-      serializedVersion: 2
-      m_Curve: []
-      m_PreInfinity: 0
-      m_PostInfinity: 0
-      m_RotationOrder: 0
-    Property: 3
-    PropertyName: 
-    Duration: 1
-    RelativeToCurrent: 1
-    Start: {x: 0, y: -500, z: 0}
-    End: {x: 0, y: 0, z: 0}
-    PlayType: 0
-    PlayOnEnable: 1
-    RandomDelay: 0
-    DefaultDelay: {x: 0, y: 0}
-    TimeScaleDependent: 0
-    OnComplete:
-      m_PersistentCalls:
-        m_Calls: []
 --- !u!1 &1060645032
 GameObject:
   m_ObjectHideFlags: 0
@@ -1052,7 +1047,6 @@ GameObject:
   - component: {fileID: 1483455047}
   - component: {fileID: 1483455049}
   - component: {fileID: 1483455048}
-  - component: {fileID: 1483455050}
   m_Layer: 5
   m_Name: Image
   m_TagString: Untagged
@@ -1117,43 +1111,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1483455046}
   m_CullTransparentMesh: 1
---- !u!114 &1483455050
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1483455046}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 80bff3e49246b4c4a9acbeada9480be4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  tweens:
-  - Name: 
-    ObjectToAnimate: {fileID: 0}
-    Ease: 1
-    UseCustomCurve: 0
-    CustomCurve:
-      serializedVersion: 2
-      m_Curve: []
-      m_PreInfinity: 0
-      m_PostInfinity: 0
-      m_RotationOrder: 0
-    Property: 3
-    PropertyName: 
-    Duration: 1.2
-    RelativeToCurrent: 1
-    Start: {x: 0, y: -50, z: 0}
-    End: {x: 0, y: 0, z: 0}
-    PlayType: 0
-    PlayOnEnable: 1
-    RandomDelay: 0
-    DefaultDelay: {x: 0, y: 0}
-    TimeScaleDependent: 0
-    OnComplete:
-      m_PersistentCalls:
-        m_Calls: []
 --- !u!1 &1789065997
 GameObject:
   m_ObjectHideFlags: 0
