@@ -15,19 +15,24 @@ namespace Util.Var
     public class VariableTypeBuilderWindow : OdinEditorWindow
     {
         
-        [MenuItem("Tools/GameEventBuilder")]
+        [MenuItem("Tools/VariableTypeBuilder")]
         [MenuItem("Assets/Create/Custom/new variable...")]
         private static void ShowWindow()
         {
             var window = GetWindow<VariableTypeBuilderWindow>();
-            window.titleContent = new GUIContent("Game Event Builder");
+            window.titleContent = new GUIContent("Variable Type Builder");
             window.Show();
         }
 
+        [Tooltip("namespace qualified type that you are looking to generate the variable/event for e.g. UnityEngine.Vector2")]
         [SerializeField] private string targetTypeName;
+        [Tooltip("Root namespace for generate types. Variable<T> goes in root")]
         [SerializeField] private string rootNamespace = "Util.Var";
+        [Tooltip("Namespace of event types will be relative to root. eg YourEvent will be added to {rootNamespace}/{eventNamespace}")]
         [SerializeField] private string eventNamespace = "Events";
+        [Tooltip("Namespace of observable types will be relative to root. eg YourObservable will be added to {rootNamespace}/{observableNamespace}")]
         [SerializeField] private string observableNamespace = "Observe";
+        [Tooltip("The folder in which to put the Variable type. Event and Observable will be children of this folder")]
         [FolderPath, OnValueChanged("UpdateFullClassPath")]
         [SerializeField] private string rootClassFolder;
 
